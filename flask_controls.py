@@ -63,10 +63,11 @@ def _calc_times():
   Expects one URL-encoded argument, the number of miles. 
   """
   app.logger.debug("Got a JSON request");
-  km = request.args.get('km', 0, type=int)
-  #FIXME: These probably aren't the right open and close times
-  open_time = acp_times.open_time(km, 200, arrow.now().isoformat)
-  close_time = acp_times.close_time(km, 200, arrow.now().isoformat)
+  km = request.args.get('km', type=int)
+  brev_dist = request.args.get('brev_dist', type=int)
+
+  open_time = acp_times.open_time(km, brev_dist, arrow.now().isoformat)
+  close_time = acp_times.close_time(km, brev_dist, arrow.now().isoformat)
   result={ "open": open_time, "close": close_time }
   return jsonify(result=result)
 
