@@ -125,11 +125,13 @@
   function calc_times(control) {
     var km = control.find("input[name='km']").val();
     var brev_dist = control.find("select name='distance'").val();
-    var start_date = 
+    var start_date = control.find("input[name='begin_date']").val();
+    var start_time = control.find("input[name='begin_time']").val();
+    var start = Date.parse(start_date + " " + start_time).toISOString
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
     
-    $.getJSON(TIME_CALC_URL, { km: km, brev_dist: brev_dist, start_date: start_date }, 
+    $.getJSON(TIME_CALC_URL, { km: km, brev_dist: brev_dist, start: start }, 
       // response handler
       function(data) {
          var times = data.result;
