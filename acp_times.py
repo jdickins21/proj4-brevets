@@ -5,11 +5,11 @@ following rules described at https://rusa.org/octime_alg.html
 and https://rusa.org/pages/rulesForRiders
 """
 import arrow
-import Math
+import math
 import dateutil.parser
 
-MAX_SPEED = {"200":34, "300":32, "400":30, "600":28, "1000":26`}
-MIN_SPEED = {"200-400":15, "600":11.428, "1000":13.333}
+MAX_SPEED = {"200":34, "400":32, "600":30, "1000":28, "1300":26}
+MIN_SPEED = {"200-600":15, "1000":11.428, "1300":13.333}
 FINISH_TIME = {"200":13.5, "300":20, "400":27, "600":40, "1000":75}
 
 #  Note for CIS 322 Fall 2016:
@@ -21,9 +21,6 @@ FINISH_TIME = {"200":13.5, "300":20, "400":27, "600":40, "1000":75}
 #  javadoc comments. 
 #
 
-
-
-INC_DIST = 200 #increment of distance to decrementing speed
 def open_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     """
     Args:
@@ -40,27 +37,64 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     con_dist = control_dist_km
     brev_dist = brevet_dist_km
     brev_strt = brevet_start_time
-    speed = MXA_SPEED[str(brev_dist)]
+    speed = MAX_SPEED[str(brev_dist)]
     total_time = 0.0
     hours_to_open = 0
     mins_to_open = 0
-    loop_count = Math.ceil(condist/INC_DIST) #for while loop
+
+    # parse ISO 8601 format
+    date_time_format = dateutil.parser.parse(brev_strt)
+
+    # reformat to arrow
+    arrow_format_date = arrow.Arrow.fromdatetime(date_time_format)
+
     i = 0 # for while loop
+
+
+
+    if con_dist == 0:
+      return arrow_format_date.isoformat()
 
     # while the distance needed to be traveled is greater than 200 km
     # the max speed will decriment by 2 km/hr 
     # decrement con_dist to get out of the initial while loop
     if brev_dist < con_dist:
       con_dist = brev_dist
-    while con_dist > INC_DIST:
-      while i < loop_count:
-        total_time += INC_DIST/speed
-        con_dist -= INC_DIST
-        if speed > MAX_SPEED["1000"]
-          speed = speed - 2
+      
+    while con_dist > 200: 
+
+      while con_dist > 400:
+
+        while con_dist > 600:
+
+          while con_dist > 1000:
+            # to get to 1000 km
+            a = (con_dist - 1000)
+            total_time += a/MAX_SPEED["1300"]
+            con_dist -= a
+            # end while
+
+          # to get to 600 km
+          b = (con_dist - 600)
+          total_time += b/MAX_SPEED["1000"]
+          con_dist -= b
+          # end while
+
+        # to get to 400 km
+        c = (con_dist - 400)
+        total_time += c/MAX_SPEED["600"]
+        con_dist -= c
+        # end while
+
+      # to get to 300 km
+      d = (con_dist - 200)
+      total_time += d/MAX_SPEED["400"]
+      con_dist -= d
+      # end while
+
 
     # final (or only) time added
-    total_time  += INC_DIST/speed
+    total_time  += con_dist/MAX_SPEED["200"]
 
     # total hours
     hours_to_open = int(total_time)
@@ -68,13 +102,7 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     # mins in fraction of a hours
     mins_to_open = total_time - hours_to_open
     # mins  
-    mins_to_open = Math.ceil(mins_to_open * 60)
-
-    # parse ISO 8601 format
-    date_time_format = dateutil.parser.parse(brev_strt)
-
-    # reformat to arrow
-    arrow_format_date = arrow.fromdatetime(date_time_format)
+    mins_to_open = int(mins_to_open * 60)
 
     #set open time
     open_time = arrow_format_date.replace(hours =+ hours_to_open, minutes =+ mins_to_open)
@@ -102,42 +130,44 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     hours_to_close = 0
     mins_to_close = 0
 
+    # parse ISO 8601 format
+    date_time_format = dateutil.parser.parse(brev_strt)
+
+    # reformat to arrow
+    arrow_format_date = arrow.Arrow.fromdatetime(date_time_format)
+
+    if con_dist == 0:
+      return arrow_format_date.replace(hours = 1).isoformat()
+
     if brev_dist > con_dist:
 
-    while(con_dist > 600):
+      while con_dist >= 600:
 
-      while(con_dist > 1000):
-        # to get to 1000 km
-        i = (con_dist - 1000)
-        total_time += i/MIN_SPEED["1000"]
-        con_dist -= i
+        while con_dist > 1000:
+          # to get to 1000 km
+          i = (con_dist - 1000)
+          total_time += i/MIN_SPEED["1000"]
+          con_dist -= i
+          # end while
+
+        # to get to 600 km
+        j = (con_dist - 600)
+        total_time += j/MIN_SPEED["600"]
+        con_dist -= j
         # end while
 
-      # to get to 600 km
-      j = (con_dist - 600)
-      total_time += j/MIN_SPEED["600"]
-      con_dist -= j
-      # end while
-
-      total_time += con_dist/MIN_SPEED["200-400"]
-
-      # total hours
-      hours_to_close = int(total_time)
-
-      # mins in fraction of a hours
-      mins_to_close = total_time - hours_to_close
-      # mins  
-      mins_to_close = Math.ceil(mins_to_close * 60)
-
-      # parse ISO 8601 format
-      date_time_format = dateutil.parser.parse(brev_strt)
-
-      # reformat to arrow
-      arrow_format_date = arrow.fromdatetime(date_time_format)
+      total_time += con_dist/MIN_SPEED["200-600"]
 
     else:
-      hours_to_close = int(FINISH_TIME[str(brev_dist)])
-      mins_to_close = Math.ceil((FINISH_TIME[str(brev_dist)] - hours_to_close) * 60)
+      total_time = FINISH_TIME[str(brev_dist)]
+
+    # total hours
+    hours_to_close = int(total_time)
+
+    # mins in fraction of a hours
+    mins_to_close = total_time - hours_to_close
+    # mins  
+    mins_to_close = math.ceil(mins_to_close * 60)
 
     #set open time
     open_time = arrow_format_date.replace(hours =+ hours_to_close, minutes =+ mins_to_close)
